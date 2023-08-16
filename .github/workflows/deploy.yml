@@ -1,0 +1,50 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - 'main'
+  release:
+    types: [published]  
+
+jobs:
+  build:
+    name: "Build"
+    if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '--deploy')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build
+        run: | 
+          echo "Build"
+
+  deploy-staging:
+    name: "Deploy (Staging)"
+    environment: Staging
+    if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '--deploy')
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy To Staging
+        run: | 
+          echo "Deploy To Staging"
+
+  deploy-qa:
+    name: "Deploy (QA)"
+    environment: QA
+    if: always() && github.event_name == 'release' && github.event.action == 'published'
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy To QA
+        run: | 
+          echo "Deploy To QA"
+          
+  deploy-prod:
+    name: "Deploy (Production)"
+    environment: Production
+    needs: [deploy-qa]
+    if: always() && github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy To Production
+        run: | 
+          echo "Deploy To Production"
