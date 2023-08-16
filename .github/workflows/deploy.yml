@@ -1,13 +1,15 @@
 name: Deploy
 on:
   push:
+    branches:
+      - 'main'
   release:
     types: [published]  
 
 jobs:
   build:
     name: "Build"
-    if: github.ref == 'refs/heads/main' 
+    if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '--deploy')
     runs-on: ubuntu-latest
     steps:
       - name: Build
